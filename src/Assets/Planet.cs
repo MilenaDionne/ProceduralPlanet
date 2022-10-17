@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class Planet : MonoBehaviour {
 
-    [Range(2, 256)]
+    [Range(2,256)]
     public int resolution = 10;
     public bool autoUpdate = true;
+    public enum FaceRenderMask { All, Top, Bottom, Left, Right, Front, Back };
+    public FaceRenderMask faceRenderMask;
 
     public ShapeSettings shapeSettings;
     public ColourSettings colourSettings;
@@ -63,11 +65,12 @@ public class Planet : MonoBehaviour {
     }
 
     private void OnValidate()
-	{
+    {
         Initialize();
         GenerateMesh();
         GenerateColours();
-}
+    }
+
 
     void Initialize()
     {
@@ -94,6 +97,8 @@ public class Planet : MonoBehaviour {
             }
 
             terrainFaces[i] = new TerrainFace(shapeGenerator, meshFilters[i].sharedMesh, resolution, directions[i]);
+            bool renderFace = faceRenderMask == FaceRenderMask.All || (int)faceRenderMask - 1 == i;
+            meshFilters[i].gameObject.SetActive(renderFace);
         }
     }
 
@@ -124,9 +129,12 @@ public class Planet : MonoBehaviour {
 
     void GenerateMesh()
     {
-        foreach (TerrainFace face in terrainFaces)
+        for (int i = 0; i < 6; i++)
         {
-            face.ConstructMesh();
+            if (meshFilters[i].gameObject.activeSelf)
+            {
+                terrainFaces[i].ConstructMesh();
+            }
         }
     }
 
